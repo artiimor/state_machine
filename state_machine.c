@@ -45,6 +45,8 @@ state_machine *state_machine_new(state *init_state, state **states, transition *
     ;
   new_state_machine->transition_number = i;
 
+	/*hola*/
+
   return new_state_machine;
 }
 
