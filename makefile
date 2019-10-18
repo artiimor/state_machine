@@ -36,6 +36,8 @@ state.o : state.c state.h
 
 clean :
 	rm -rf *o
+	rm -rf *gch
+	rm -rf main
 
 valgrind:
 	valgrind --leak-check=full ./main

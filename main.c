@@ -11,10 +11,6 @@ int main()
 {
     state *Q0, *Q1, *Q2, *Q3, *QF;
     transition *f1, *f2, *f3, *f4;
-    state *state_array_1[1];
-    state *state_array_2[1];
-    state *state_array_3[1];
-    state *state_array_4[1];
 
     state *all_states[5];
 
@@ -22,16 +18,11 @@ int main()
 
     state_machine *state_machine;
 
-    Q0 = state_create(INITIAL, "Q0");
-    Q1 = state_create(OTHER, "Q1");
-    Q2 = state_create(OTHER, "Q2");
-    Q3 = state_create(OTHER, "Q3");
-    QF = state_create(FINAL, "QF");
-
-    state_array_1[0] = Q1;
-    state_array_2[0] = Q2;
-    state_array_3[0] = Q3;
-    state_array_4[0] = QF;
+    Q0 = state_create(INITIAL, 0);
+    Q1 = state_create(OTHER, 1);
+    Q2 = state_create(OTHER, 2);
+    Q3 = state_create(OTHER, 3);
+    QF = state_create(FINAL, 4);
 
     all_states[0] = Q0;
     all_states[1] = Q1;
@@ -39,10 +30,10 @@ int main()
     all_states[3] = Q3;
     all_states[4] = QF;
 
-    f1 = transition_new(Q0, 'h', state_array_1, 1);
-    f2 = transition_new(Q1, 'o', state_array_2, 1);
-    f3 = transition_new(Q2, 'l', state_array_3, 1);
-    f4 = transition_new(Q3, 'a', state_array_4, 1);
+    f1 = transition_new(Q0, 'h', Q1);
+    f2 = transition_new(Q1, 'o', Q2);
+    f3 = transition_new(Q2, 'l', Q3);
+    f4 = transition_new(Q3, 'a', QF);
 
     all_transitions[0] = f1;
     all_transitions[1] = f2;
@@ -53,7 +44,7 @@ int main()
     state_print(state_array_1[0]);
     transition_print(f1);*/
 
-    state_machine = state_machine_new(Q0, all_states, all_transitions);
+    state_machine = state_machine_new(Q0, all_states, all_transitions, 5, 4);
 
     if(state_machine_isvalidword(state_machine, "hola")){
         printf("FUNCIONA, He reconocido la palabra\n");
@@ -61,6 +52,20 @@ int main()
     else{
         printf("No he reconocido la palabra\n");
     }
+
+    /*free all the memory*/
+    free(Q0);
+    free(Q1);
+    free(Q2);
+    free(Q3);
+    free(QF);
+
+    free(f1);
+    free(f2);
+    free(f3);
+    free(f4);
+
+    free(state_machine);
 
     return 0;
 

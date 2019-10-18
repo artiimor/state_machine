@@ -8,15 +8,15 @@
 struct _state
 {
   type_state type;
-  char *name;
+  long id;
 };
 
-state *state_create(int type, char *name)
+state *state_create(int type, long id)
 {
 
   state *new_state;
 
-  if ((type != INITIAL && type != FINAL && type != OTHER) || name == NULL)
+  if ((type != INITIAL && type != FINAL && type != OTHER) || id < 0)
     return NULL;
 
   new_state = (state *)malloc(sizeof(state));
@@ -27,13 +27,16 @@ state *state_create(int type, char *name)
   new_state->type = type;
 
 
-  strcpy(new_state->name, name);
+  new_state->id = id;
 
   return new_state;
 }
 
 int state_is_final(state *state)
 {
+  if (state == NULL)
+    return FALSE;
+    
   if (state->type == FINAL)
     return TRUE;
 
@@ -57,7 +60,7 @@ int state_is_equal(state *s1, state *s2)
   if (s1 == s2)
     return TRUE;
 
-  if (strcmp(s1->name, s2->name) == 0)
+  if (s1->id == s2->id)
     return TRUE;
 
   return FALSE;
@@ -65,5 +68,5 @@ int state_is_equal(state *s1, state *s2)
 
 void state_print(state *state)
 {
-  printf("\n\nESTADO:\n\tTIPO: %d.\n\tNOMBRE: %s\n\n",state->type,state->name);
+  printf("ESTADO:\n\tTIPO: %d\nID: %ld\n\n",state->type,state->id);
 }

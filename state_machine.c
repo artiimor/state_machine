@@ -19,13 +19,12 @@ struct _state_machine
   int transition_number;
 };
 
-state_machine *state_machine_new(state *init_state, state **states, transition **transition_function)
+state_machine *state_machine_new(state *init_state, state **states, transition **transition_function, int state_number, int transition_number)
 {
 
-  int i;
   state_machine *new_state_machine;
 
-  if (init_state == NULL || states == NULL || transition_function == NULL || state_is_initial(init_state) == FALSE)
+  if (init_state == NULL || states == NULL || transition_function == NULL || state_is_initial(init_state) == FALSE || state_number <= 0 || transition_number <= 0)
     return NULL;
 
   new_state_machine = (state_machine *)malloc(sizeof(state_machine));
@@ -37,15 +36,9 @@ state_machine *state_machine_new(state *init_state, state **states, transition *
   new_state_machine->states = states;
   new_state_machine->transition_function = transition_function;
 
-  for (i = 0; states[i] != NULL; i++)
-    ;
-  new_state_machine->state_number = i;
+  new_state_machine->state_number = state_number;
 
-  for (i = 0; transition_function[i] != NULL; i++)
-    ;
-  new_state_machine->transition_number = i;
-
-	/*hola*/
+  new_state_machine->transition_number = transition_number;
 
   return new_state_machine;
 }
@@ -111,13 +104,13 @@ int state_machine_get_transitionnumber(state_machine *state_machine)
 boolean state_machine_isvalidword(state_machine *state_machine, char *word)
 {
 
-  int i, j, k, n;                  /*counter for the loops*/
+  int i, j, k;                  /*counter for the loops*/
   int max_states, max_transitions; /*max amount of states and transitions*/
-  int actual_states_aux, previous_states_aux, output_states_lenght;
+  int actual_states_aux, previous_states_aux;
   transition **transitions; /*all the transitions*/
   state **actual_states = NULL;
   state **previous_states = NULL;
-  state **transition_output_aux;
+  state *transition_output_aux;
   state *initial_state;
 
   char symbol_aux;
@@ -127,21 +120,6 @@ boolean state_machine_isvalidword(state_machine *state_machine, char *word)
   {
     return FALSE;
   }
-
-  /*
-  for (i = 0; i < state_machine->state_number; i++)
-  {
-    state_print(state_machine->states[i]);
-  }
-  */
- 
-  /*
-  for (i = 0; i < state_machine->transition_number; i++)
-  {
-    transition_print(state_machine->transition_function[i]);
-  }
-  */
-  
 
   /*we want to check all the transitions and states*/
   transitions = state_machine_get_transitions(state_machine);
@@ -154,20 +132,12 @@ boolean state_machine_isvalidword(state_machine *state_machine, char *word)
   /*loop for every symbol of the word*/
   for (i = 0; i < strlen(word); i++)
   {
-    if (previous_states != NULL)
-    {
-      free(previous_states);
-      previous_states = actual_states;
-      previous_states_aux = actual_states_aux;
-    }
-    /*reset actual_states*/
-    actual_states = (state **)calloc(max_states, sizeof(state *));
-    actual_states_aux = 0;
+    /*in the case we are not starting with the loop, we free the previous states memory
+      and it is the actual_states array*/
 
     /*when we start*/
     if (i == 0)
     {
-      printf("HOLA\n");
       /*loop for checking every possible transition*/
       for (k = 0; k < max_transitions; k++)
       {
@@ -176,16 +146,12 @@ boolean state_machine_isvalidword(state_machine *state_machine, char *word)
         /*we have a new state if exist a transition with the correct symbol and state*/
         if (symbol_aux == word[i] && state_is_equal(transition_input_aux, initial_state))
         {
-          transition_output_aux = transition_get_output_states(transitions[k]);
+          transition_output_aux = transition_get_output_state(transitions[k]);
           /*now we introduce every output state is not container in actual_states*/
-          output_states_lenght = transition_get_output_states_lenght(transitions[k]);
-          for (n = 0; n < output_states_lenght; n++)
+          if (!is_state_contained(actual_states, transition_output_aux, actual_states_aux))
           {
-            if (!is_state_contained(actual_states, transition_output_aux[n], actual_states_aux))
-            {
-              actual_states[actual_states_aux] = transition_output_aux[n];
-              actual_states_aux++;
-            }
+            actual_states[actual_states_aux] = transition_output_aux;
+            actual_states_aux++;
           }
         }
       }
@@ -194,8 +160,13 @@ boolean state_machine_isvalidword(state_machine *state_machine, char *word)
     else
     {
       /*previous_states = actual_states, so we check every state*/
-
-      /*reset actual_states*/
+      if (previous_states != NULL)
+      {
+        free(previous_states);
+      }
+      previous_states = actual_states;
+      previous_states_aux = actual_states_aux;
+      /*reset actual_states array*/
       actual_states = (state **)calloc(max_states, sizeof(state *));
       actual_states_aux = 0;
 
@@ -210,16 +181,11 @@ boolean state_machine_isvalidword(state_machine *state_machine, char *word)
           /*we have a new state if exist a transition with the correct symbol and state*/
           if (symbol_aux == word[i] && state_is_equal(transition_input_aux, previous_states[j]))
           {
-            transition_output_aux = transition_get_output_states(transitions[k]);
-            /*now we introduce every output state is not container in actual_states*/
-            output_states_lenght = transition_get_output_states_lenght(transitions[k]);
-            for (n = 0; n < output_states_lenght; n++)
+            transition_output_aux = transition_get_output_state(transitions[k]);
+            if (!is_state_contained(actual_states, transition_output_aux, actual_states_aux))
             {
-              if (!is_state_contained(actual_states, transition_output_aux[n], actual_states_aux))
-              {
-                actual_states[actual_states_aux] = transition_output_aux[n];
-                actual_states_aux++;
-              }
+              actual_states[actual_states_aux] = transition_output_aux;
+              actual_states_aux++;
             }
           }
         }
@@ -228,13 +194,23 @@ boolean state_machine_isvalidword(state_machine *state_machine, char *word)
   }
 
   /*now we have the final states, we only have to check if there is a final state*/
-  for (i = 0; i < max_states || actual_states[i] == NULL; i++)
+  for (i = 0; i < max_states && actual_states[i] != NULL; i++)
   {
     if (state_is_final(actual_states[i]))
     {
+      /*We can recognice the word so the program has to end*/
+      /*First free all the memory*/
+      free(previous_states);
+      free(actual_states);
+
+      /*return true*/
       return TRUE;
     }
   }
+
+  /*free all the memory*/
+  free(previous_states);
+  free(actual_states);
 
   return FALSE;
 }
@@ -247,7 +223,6 @@ boolean is_state_contained(state **state_array, state *state, int state_array_le
 
   for (i = 0; i < state_array_lenght - 1 || state_array[i] == NULL; i++)
   {
-    printf("\n\n%d\n\n", state_array_lenght);
     if (state_is_equal(state, state_array[i]))
     {
       return TRUE;

@@ -16,10 +16,12 @@ typedef struct _state_machine state_machine;
  * @param init_state the initial state of the state machine
  * @param states all the states of the state machine
  * @param transition_function all the posible transitions of the state machine
+ * @param state_number number of states of the state machine
+ * @param transition_number number of transitions in the transition function
  * 
  * @return the new state machine
  */
-state_machine *state_machine_new(state *init_state, state **states, transition **transition_function);
+state_machine *state_machine_new(state *init_state, state **states, transition **transition_function, int state_number, int transition_number);
 
 /**
  * state_machine_contains_state check if the state_machine contains a state

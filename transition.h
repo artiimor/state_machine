@@ -17,7 +17,7 @@ typedef struct _transition transition;
   * @param imput_symbol imput simbol
   * @param res_states array with states. Result of this case of the transition function
   */
-transition *transition_new(state *input_state, char input_symbol, state **output_states, int output_states_lenght);
+transition *transition_new(state *input_state, char input_symbol, state *output_states);
 
 /**
   * getter of the input state of this case.
@@ -40,16 +40,17 @@ char transition_get_input_symbol(transition *transition);
   * @param transition the case of the transition function
   * @return an array with the output states
   */
-state **transition_get_output_states(transition *transition);
+state *transition_get_output_state(transition *transition);
+
+/***************************************************************************/
+/****************************debug functions********************************/
+/***************************************************************************/
 
 /**
-  * Getter getter of the number of output states.
+  * print the information of the transition
   * 
-  * @param transition the case of the transition function
-  * @return an integer with the number of output states
+  * @param transition the transition to print
   */
-
-int transition_get_output_states_lenght(transition *transition);
 
 void transition_print(transition *transition);
 

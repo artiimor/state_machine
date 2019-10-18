@@ -5,9 +5,12 @@
 typedef struct _state state;
 
 /** Creates a state
-  @param type enum that shows the type of the state
-  @return ste state or NULL if something wrong happened*/
-state *state_create(int type, char *name);
+  * @param type enum that shows the type of the state
+  * @param long with the id of the state
+  * 
+  * @return ste state or NULL if something wrong happened
+  */
+state *state_create(int type, long id);
 
 /**
   * check if a state is final or not
